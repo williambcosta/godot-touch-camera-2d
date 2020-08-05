@@ -1,0 +1,11 @@
+# Import cache
+.import/
+*.import
+
+# Binaries
+bin/
+build/
+lib/
+
+# Export Pressets
+export_presets.cfg
