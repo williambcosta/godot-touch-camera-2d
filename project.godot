@@ -8,15 +8,32 @@
 
 config_version=4
 
-_global_script_classes=[  ]
+_global_script_classes=[ {
+"base": "Camera2D",
+"class": "TouchCamera2D",
+"language": "GDScript",
+"path": "res://TouchCamera2D.gd"
+} ]
 _global_script_class_icons={
-
+"TouchCamera2D": "res://touch_camera_icon.svg"
 }
 
 [application]
 
 config/name="TouchCamera2D"
+run/main_scene="res://CameraTest.tscn"
 config/icon="res://icon.png"
+
+[display]
+
+window/size/width=960
+window/size/height=540
+window/size/resizable=false
+window/stretch/aspect="keep"
+
+[input_devices]
+
+pointing/emulate_mouse_from_touch=false
 
 [rendering]
 
