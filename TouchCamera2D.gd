@@ -60,23 +60,32 @@ func _unhandled_input(event: InputEvent) -> void:
 			# erases this event from the dictionary
 			events.erase(0)
 
-	# If it's a ScreenDrag
+	# If it's a motion
 	if ( (event is InputEventScreenDrag)
 			or (handle_mouse_events and event is InputEventMouseMotion) ):
-		# And the dictionary have only one event stored, it means that
+		# If it's a ScreenDrag
+		if event is InputEventScreenDrag:
+			var last_pos: Vector2 = events[event.index].position
+			
+			# If the distance between this touch index and the stored
+			# is greater than the zoom sensitivity
+			if last_pos.distance_to(event.position) > zoom_sensitivity:
+				# Update the event stored in the dictionary
+				events[event.index] = event
+		
+		# If the dictionary have only one event stored, it means that
 		# the user is moving the camera
 		if events.size() == 1:
 			set_position(position - event.relative * zoom)
 
 		# If there are more than one finger on screen
-		elif events.size() == 2:
+		elif events.size() == 2 and events.has_all([0, 1]):
 			# Stores the touches position
 			var p1: Vector2 = events[0].position
 			var p2: Vector2 = events[1].position
 
 			# Calculates the distance between them
 			var pinch_distance: float = p1.distance_to(p2)
-
 			# If the absolute difference between the last and the
 			# current pinch distance is greater than the zoom sensitivity
 			if abs(pinch_distance - last_pinch_distance) > zoom_sensitivity:
