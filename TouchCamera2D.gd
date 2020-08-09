@@ -36,6 +36,21 @@ var last_pinch_distance: float = 0
 # to store previous events for latter use
 var events = {}
 
+# Viewport size
+var vp_size := Vector2.ZERO
+
+
+# Connects the viewport signal
+func _ready() -> void:
+	# This call initializes the vp_size reference
+	_on_viewport_size_changed()
+
+	# If the signal connection is not OK
+	if get_viewport().connect("size_changed",
+			self,"_on_viewport_size_changed") != OK:
+		# Sets vp_size
+		vp_size = get_viewport().size
+
 
 # Captures the unhandled inputs to verify the action to be executed by
 # the camera
@@ -140,6 +155,20 @@ func _unhandled_input(event: InputEvent) -> void:
 				set_zoom(zoom + zoom_diff)
 
 
+# Updates the reference vp_size properly when the viewport change size
+func _on_viewport_size_changed() -> void:
+	print(get_viewport().get_size_override())
+	# If the stretch mode is set to disabled or viewport, the size override will
+	# always be (0, 0). And if that's the case, the vp_size will be the
+	# viewport size
+	if get_viewport().get_size_override() == Vector2.ZERO:
+		vp_size = get_viewport().size
+
+	# Otherwise, vp_size will be the size_override
+	else:
+		vp_size = get_viewport().get_size_override()
+
+
 # Sets the camera's zoom making sure it stays between the minimum and maximum
 func set_zoom(new_zoom: Vector2) -> void:
 	new_zoom.x = clamp(new_zoom.x, min_zoom, max_zoom)
@@ -159,7 +188,7 @@ func set_position(new_position: Vector2) -> void:
 	# the left/top (bottom/right as well) limit plus half the viewport
 	# times the zoom
 	if anchor_mode == ANCHOR_MODE_DRAG_CENTER:
-		offset = get_viewport().size / 2
+		offset = vp_size / 2
 		left = limit_left + offset.x * zoom.x
 		top = limit_top + offset.y * zoom.y
 
@@ -167,13 +196,13 @@ func set_position(new_position: Vector2) -> void:
 	# by the offset. Consequently the offset for bottom/right limits are the
 	# entire viewport times the zoom
 	elif anchor_mode == ANCHOR_MODE_FIXED_TOP_LEFT:
-		offset = get_viewport().size
+		offset = vp_size
 		left = limit_left
 		top = limit_top
 
 	# Apply the offset to the bottom/right limits
-	right = limit_right - offset .x * zoom.x
-	bottom = limit_bottom - offset .y * zoom.y
+	right = limit_right - offset.x * zoom.x
+	bottom = limit_bottom - offset.y * zoom.y
 
 	# Makes sure that the camera's position stays between the scroll limits
 	position.x = clamp(new_position.x, left, right)
