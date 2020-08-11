@@ -14,6 +14,10 @@ export var zoom_sensitivity: int = 10
 # How much the zoom will be incremented/decremented when the action happens
 export var zoom_increment: float = 0.05
 
+# If set true, the camera's position will be relative to a specific point
+# when zooming (the mouse cursor or the middle point between the fingers)
+export var zoom_at_point: bool = true
+
 # If true the camera can be moved while zooming
 # Relevant only for pinch to zoom actions
 export var move_while_zooming: bool = true
@@ -121,6 +125,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 			# Calculates the distance between them
 			var pinch_distance: float = p1.distance_to(p2)
+
 			# If the absolute difference between the last and the
 			# current pinch distance is greater than the zoom sensitivity
 			if abs(pinch_distance - last_pinch_distance) > zoom_sensitivity:
@@ -135,11 +140,19 @@ func _unhandled_input(event: InputEvent) -> void:
 				else:
 					new_zoom = (zoom.x - zoom_increment)
 
-				# Updates the camera's zoom
-				set_zoom(new_zoom * Vector2.ONE)
+				# If zoom at point is true
+				if zoom_at_point:
+					# Updates the camera's zoom and position
+					# to keep the focused point at screen
+					# In case of pinch to zoom, the focus will be the
+					# average point between the fingers
+					zoom_at(new_zoom * Vector2.ONE, (p1 + p2) / 2)
+				else:
+					# Otherwise, just updates de camera's zoom
+					set_zoom(new_zoom * Vector2.ONE)
 
 				# Stores the current pinch_distance as the last for
-				# future verification
+				# future use
 				last_pinch_distance = pinch_distance
 
 	# If the mouse events is set to be handled
@@ -148,16 +161,21 @@ func _unhandled_input(event: InputEvent) -> void:
 			var zoom_diff := Vector2(mouse_zoom_increment, mouse_zoom_increment)
 			# Wheel up = zoom-in
 			if event.get_button_index() == BUTTON_WHEEL_UP:
-				set_zoom(zoom - zoom_diff)
+				if zoom_at_point:
+					zoom_at(zoom - zoom_diff, event.position)
+				else:
+					set_zoom(zoom - zoom_diff)
 
 			# Wheel down = zoom-out
 			if event.get_button_index() == BUTTON_WHEEL_DOWN:
-				set_zoom(zoom + zoom_diff)
+				if zoom_at_point:
+					zoom_at(zoom + zoom_diff, event.position)
+				else:
+					set_zoom(zoom + zoom_diff)
 
 
 # Updates the reference vp_size properly when the viewport change size
 func _on_viewport_size_changed() -> void:
-	print(get_viewport().get_size_override())
 	# If the stretch mode is set to disabled or viewport, the size override will
 	# always be (0, 0). And if that's the case, the vp_size will be the
 	# viewport size
@@ -173,6 +191,26 @@ func _on_viewport_size_changed() -> void:
 func set_zoom(new_zoom: Vector2) -> void:
 	new_zoom.x = clamp(new_zoom.x, min_zoom, max_zoom)
 	zoom = Vector2.ONE * new_zoom.x
+
+
+# Sets the zoom and positions the camera to keep the focused point at screen
+func zoom_at(new_zoom: Vector2, point: Vector2) -> void:
+	if new_zoom.x > min_zoom and new_zoom.x < max_zoom:
+
+		# If the camera's anchor is set to center
+		if anchor_mode == ANCHOR_MODE_DRAG_CENTER:
+			# Updates the point value to be relative to the center of the screen
+			point -= vp_size/2
+
+		# Holds the difference between the updated and the current zoom
+		var zoom_diff: Vector2
+		zoom_diff = new_zoom - zoom
+
+		# Sets the camera's position to keep the focus point on screen
+		set_position(position - (point * zoom_diff).floor())
+
+		# Sets the new zoom
+		set_zoom(new_zoom)
 
 
 # Sets the camera's position making sure it stays between the scroll limits

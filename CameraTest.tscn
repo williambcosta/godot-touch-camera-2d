@@ -8,7 +8,11 @@
 [node name="Marks" type="Node" parent="."]
 
 [node name="TopLeftLimit" type="Sprite" parent="Marks"]
-position = Vector2( -100, -100 )
+position = Vector2( -1000, -1000 )
+texture = ExtResource( 1 )
+
+[node name="TopRightLimit" type="Sprite" parent="Marks"]
+position = Vector2( 2920, -1000 )
 texture = ExtResource( 1 )
 
 [node name="TopLeft" type="Sprite" parent="Marks"]
@@ -20,10 +24,6 @@ texture = ExtResource( 1 )
 
 [node name="TopRight" type="Sprite" parent="Marks"]
 position = Vector2( 1920, 0 )
-texture = ExtResource( 1 )
-
-[node name="TopRightLimit" type="Sprite" parent="Marks"]
-position = Vector2( 2020, -100 )
 texture = ExtResource( 1 )
 
 [node name="QuarterLeftTop" type="Sprite" parent="Marks"]
@@ -54,10 +54,6 @@ texture = ExtResource( 1 )
 position = Vector2( 1440, 810 )
 texture = ExtResource( 1 )
 
-[node name="BottomLeftLimit" type="Sprite" parent="Marks"]
-position = Vector2( -100, 1180 )
-texture = ExtResource( 1 )
-
 [node name="BottomLeft" type="Sprite" parent="Marks"]
 position = Vector2( 0, 1080 )
 texture = ExtResource( 1 )
@@ -70,15 +66,19 @@ texture = ExtResource( 1 )
 position = Vector2( 1920, 1080 )
 texture = ExtResource( 1 )
 
+[node name="BottomLeftLimit" type="Sprite" parent="Marks"]
+position = Vector2( -1000, 1980 )
+texture = ExtResource( 1 )
+
 [node name="BottomRightLimit" type="Sprite" parent="Marks"]
-position = Vector2( 2020, 1180 )
+position = Vector2( 2920, 1980 )
 texture = ExtResource( 1 )
 
 [node name="TouchCamera2D" type="Camera2D" parent="."]
 position = Vector2( 960, 540 )
 current = true
-limit_left = -100
-limit_top = -100
-limit_right = 2020
-limit_bottom = 1180
+limit_left = -1000
+limit_top = -1000
+limit_right = 2820
+limit_bottom = 1980
 script = ExtResource( 2 )
