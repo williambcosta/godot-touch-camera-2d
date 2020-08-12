@@ -79,6 +79,6 @@ position = Vector2( 960, 540 )
 current = true
 limit_left = -1000
 limit_top = -1000
-limit_right = 2820
+limit_right = 2920
 limit_bottom = 1980
 script = ExtResource( 2 )

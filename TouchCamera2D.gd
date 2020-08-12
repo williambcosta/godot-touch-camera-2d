@@ -1,3 +1,4 @@
+# Make sure the icon path points to the correct location
 class_name TouchCamera2D, "res://touch_camera_icon.svg"
 
 extends Camera2D
@@ -94,8 +95,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				events.erase(0)
 
 	# If it's a motion
-	if ( (event is InputEventScreenDrag)
-			or (handle_mouse_events and event is InputEventMouseMotion) ):
+	if ((event is InputEventScreenDrag)
+			or (handle_mouse_events and event is InputEventMouseMotion)):
 		# If it's a ScreenDrag
 		if event is InputEventScreenDrag:
 			var last_pos: Vector2 = events[event.index].position
