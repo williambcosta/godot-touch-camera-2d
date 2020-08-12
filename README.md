@@ -20,17 +20,17 @@ the class icon path points to the correct svg file (touch_camera_icon.svg)
 or simply delete everything after `class_name TouchCamera2D`.
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/icon_path_highlighted.png"alt="Icon Path">
+    <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/icon_path_highlighted.png" alt="Icon Path">
 </p>
 
 If everything is done right you should be able to add the camera as a node
 on your scene tree.
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/add_camera.gif"alt="Add camera">
+    <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/add_camera.gif" alt="Add camera">
 </p>
 
-Set the parameters you need and make sure you mark the camera as the current
+Set the parameters you need and make sure to mark the camera as the current
 one (it can also be set via script by calling `camera_reference.make_current()`).
 Done, it should be ready.
 
@@ -40,7 +40,7 @@ Done, it should be ready.
 
 ## Compatibility
 
-For now ,the camera script was only tested using the Godot version 3.2.x
+For now, the camera script was only tested using the Godot version 3.2.x
 
 ## Functioning
 
@@ -66,7 +66,7 @@ mouse wheel up/down to zoom in and out.
 By default, the camera move the camera while you applying zoom, so you don't
 have to remove a finger to move the camera if needed.
 
-It can be turned off in the Inspector panel by disabling **Move While Zooming**.
+It can be turned off on the Inspector panel by disabling **Move While Zooming**.
 
 <p align="center">
     <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/move_while_zooming.gif" width="450" alt="Move camera while zooming">
@@ -92,7 +92,7 @@ this events never reaches the camera? Well, the camera will not do anything.
 
 A good example of this is Nodes that inherits `Control`. The `Control`
 nodes always handle the inputs that occur inside them, even when your
-code don't do nothing to it. In this cases you can call the camera's
+code don't do anything with it. In this cases you can call the camera's
 `_unhandled_input(event: InputEvent)` method directly passing the event
 to it.
 
@@ -108,12 +108,12 @@ while you are focusing an object at 1000, 1000.
 
 A work around, is to manipulate the event's position before calling the
 camera's method, adding the node's position to the event's position. But
-you'll have to test it well to see if it's behaving properly.
+you'll have to test it well to see if it behaves properly.
 
 ### Emulating touch from mouse
 
 If you need to emulate touch from mouse and the  **Handle Mouse Events**
-are set to true, it causes a issue while moving the camera.
+are set to true, it causes an issue while moving the camera.
 
 The engine will trigger the camera's `_unhandled_input(event: InputEvent)`
 twice, one for the mouse and one for the emulated touch. For zoom action
@@ -124,10 +124,14 @@ But when moving the camera it causes the drag to double, e.g clicking and
 dragging the mouse 10 pixels, will move the camera 20.
 
 So, if you really need to emulate the touch, you'll need to change the script.
-Adjusting the if statement at the line 98 from `if ((event is InputEventScreenDrag)`
-to `if event is InputEventScreenDrag:` and deleting the line 99 as well, should
-do the trick. The lines 74 thru 95 will not be needed anymore so feel free to
-delete them.
+Adjusting the if statement at the line 98 from this
+`if ((event is InputEventScreenDrag)` to this `if event is InputEventScreenDrag:`
+and deleting the line 99 as well, should do the trick. The lines 74 thru
+95 will not be needed anymore so feel free to delete them.
+
+<p align="center">
+    <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/script_ajustments.png" width="500" alt="Script ajustments">
+</p>
 
 ## Contributing
 
