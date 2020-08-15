@@ -82,3 +82,7 @@ limit_top = -1000
 limit_right = 2920
 limit_bottom = 1980
 script = ExtResource( 2 )
+target = NodePath("../Position2D")
+
+[node name="Position2D" type="Position2D" parent="."]
+position = Vector2( 960.327, 540.058 )

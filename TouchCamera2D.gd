@@ -3,6 +3,16 @@ class_name TouchCamera2D, "res://touch_camera_icon.svg"
 
 extends Camera2D
 
+# The target that the camera will focus on
+export (NodePath) var target
+
+# If set true the camera will return to the target when the input events
+# are released
+export var return_to_target: bool = false
+
+# The return speed of the camera to the target
+export var return_speed: float = 0.15
+
 # The minimum camera zoom
 export var min_zoom: float = 0.5
 
@@ -55,6 +65,14 @@ func _ready() -> void:
 			self,"_on_viewport_size_changed") != OK:
 		# Sets vp_size
 		vp_size = get_viewport().size
+
+
+# Called every frame
+func _process(_delta) -> void:
+	# If a target exists, the return is set true and there are no input events
+	if target and return_to_target and events.size() == 0:
+		# Move the camera towards the target's position
+		position = lerp(position, get_node(target).position, return_speed)
 
 
 # Captures the unhandled inputs to verify the action to be executed by
