@@ -3,14 +3,12 @@ class_name TouchCamera2D, "res://touch_camera_icon.svg"
 
 extends Camera2D
 
-# The target that the camera will focus on
-export (NodePath) var target
+# If set true the camera will stop moving when the limits are reached.
+# Otherwise the camera will continue moving, but will return to the
+# limit smoothly
+export var stop_on_limit: bool = true setget set_stop_on_limit
 
-# If set true the camera will return to the target when the input events
-# are released
-export var return_to_target: bool = false
-
-# The return speed of the camera to the target
+# The return speed of the camera to the limit
 export var return_speed: float = 0.15
 
 # The minimum camera zoom
@@ -54,6 +52,14 @@ var events = {}
 # Viewport size
 var vp_size := Vector2.ZERO
 
+# Helps the camera to stay on the limit
+var limit_target := position
+
+# If the camera is set to continue moving off limit, the original limits of
+# the camera will be set to maximum possible and this will hold the
+# original limits
+var base_limits:= Rect2(limit_left, limit_top, limit_right, limit_bottom)
+
 
 # Connects the viewport signal
 func _ready() -> void:
@@ -69,10 +75,10 @@ func _ready() -> void:
 
 # Called every frame
 func _process(_delta) -> void:
-	# If a target exists, the return is set true and there are no input events
-	if target and return_to_target and events.size() == 0:
-		# Move the camera towards the target's position
-		position = lerp(position, get_node(target).position, return_speed)
+	# If stop on limit is set false and there are no input events
+	if not stop_on_limit and events.size() == 0:
+		# Move the camera towards the limit_target's position
+		position = lerp(position, limit_target, return_speed)
 
 
 # Captures the unhandled inputs to verify the action to be executed by
@@ -168,7 +174,7 @@ func _unhandled_input(event: InputEvent) -> void:
 					zoom_at(new_zoom * Vector2.ONE, (p1 + p2) / 2)
 				else:
 					# Otherwise, just updates de camera's zoom
-					set_zoom(new_zoom * Vector2.ONE)
+					zoom_at(new_zoom * Vector2.ONE, position)
 
 				# Stores the current pinch_distance as the last for
 				# future use
@@ -183,14 +189,14 @@ func _unhandled_input(event: InputEvent) -> void:
 				if zoom_at_point:
 					zoom_at(zoom - zoom_diff, event.position)
 				else:
-					set_zoom(zoom - zoom_diff)
+					zoom_at(zoom - zoom_diff, position)
 
 			# Wheel down = zoom-out
 			if event.get_button_index() == BUTTON_WHEEL_DOWN:
 				if zoom_at_point:
 					zoom_at(zoom + zoom_diff, event.position)
 				else:
-					set_zoom(zoom + zoom_diff)
+					zoom_at(zoom + zoom_diff, position)
 
 
 # Updates the reference vp_size properly when the viewport change size
@@ -225,20 +231,23 @@ func zoom_at(new_zoom: Vector2, point: Vector2) -> void:
 		var zoom_diff: Vector2
 		zoom_diff = new_zoom - zoom
 
-		# Sets the camera's position to keep the focus point on screen
-		set_position(position - (point * zoom_diff).floor())
-
 		# Sets the new zoom
 		set_zoom(new_zoom)
 
+		# Sets the camera's position to keep the focus point on screen
+		set_position(position - (point * zoom_diff).floor())
 
-# Sets the camera's position making sure it stays between the scroll limits
+
+# Sets the camera's position making sure it stays between the limits
 func set_position(new_position: Vector2) -> void:
 	var offset: Vector2
 	var left: float
 	var right: float
 	var top: float
 	var bottom: float
+
+	var bp := base_limits.position
+	var bs := base_limits.size
 
 	# If the camera's anchor is set to center, to make sure the camera's
 	# position stays inside the scroll limits, the position can't be less than
@@ -248,6 +257,9 @@ func set_position(new_position: Vector2) -> void:
 		offset = vp_size / 2
 		left = limit_left + offset.x * zoom.x
 		top = limit_top + offset.y * zoom.y
+
+		# Adjusts the base limit position relative to the offset * zoom
+		bp += offset * zoom
 
 	# If the anchor is set to top left, the left/top limits are not influenced
 	# by the offset. Consequently the offset for bottom/right limits are the
@@ -261,6 +273,38 @@ func set_position(new_position: Vector2) -> void:
 	right = limit_right - offset.x * zoom.x
 	bottom = limit_bottom - offset.y * zoom.y
 
-	# Makes sure that the camera's position stays between the scroll limits
-	position.x = clamp(new_position.x, left, right)
-	position.y = clamp(new_position.y, top, bottom)
+	# Adjusts the base limit size relative to the offset * zoom
+	bs -= offset * zoom
+
+	# If is to stop the camera on limit
+	if stop_on_limit:
+		# Makes sure that the camera's position stays between the limits
+		position.x = clamp(new_position.x, left, right)
+		position.y = clamp(new_position.y, top, bottom)
+
+	else:
+		# Otherwise continue moving the camera
+		position.x = new_position.x
+		position.y = new_position.y
+
+		# And clamp the limit target so that the camera can return smoothly
+		limit_target.x = clamp(new_position.x, bp.x, bs.x)
+		limit_target.y = clamp(new_position.y, bp.y, bs.y)
+
+
+# Sets the camera's behavior relative to its limits
+func set_stop_on_limit(stop: bool) -> void:
+	stop_on_limit = stop
+
+	# If the stop_on_limit is true, resets the camera limits
+	if stop_on_limit:
+		limit_left = base_limits.position.x as int
+		limit_top = base_limits.position.y as int
+		limit_right = base_limits.size.x as int
+		limit_bottom = base_limits.size.y as int
+	else:
+		# Otherwise sets the limits to the "maximum"
+		limit_left = -10000000
+		limit_top = -10000000
+		limit_right = 10000000
+		limit_bottom = 10000000
