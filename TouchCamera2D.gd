@@ -235,7 +235,7 @@ func zoom_at(new_zoom: Vector2, point: Vector2) -> void:
 		set_zoom(new_zoom)
 
 		# Sets the camera's position to keep the focus point on screen
-		set_position(position - (point * zoom_diff).floor())
+		set_position(position - (point * zoom_diff))
 
 
 # Sets the camera's position making sure it stays between the limits
