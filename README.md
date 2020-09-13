@@ -83,6 +83,18 @@ to the camera position.
     <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/zoom_at_point.gif" width="450" alt="Zoom at a specific point">
 </p>
 
+## Stop moving on camera's limit
+
+If you change the value of the camera's limits, by default, the script will
+stop moving the camera's position to prevent pan issues. But if you desire
+a more smooth action, the script can allow the user mo move the camera
+beyond the limit. After the move action be release the camera will move
+itself to the limit smoothly
+
+<p align="center">
+    <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/stop-on-limit.gif" alt="Stop moving on camera's limit">
+</p>
+
 ## Known issues
 
 ### Control Nodes
@@ -124,10 +136,10 @@ But when moving the camera it causes the drag to double, e.g clicking and
 dragging the mouse 10 pixels, will move the camera 20.
 
 So, if you really need to emulate the touch, you'll need to change the script.
-Adjusting the if statement at the line 98 from this
+Adjusting the if statement at the line 122 from this
 `if ((event is InputEventScreenDrag)` to this `if event is InputEventScreenDrag:`
-and deleting the line 99 as well, should do the trick. The lines 74 thru
-95 will not be needed anymore so feel free to delete them.
+and deleting the line 99 as well, should do the trick. The lines 99 thru
+119 will not be needed anymore so feel free to delete them.
 
 <p align="center">
     <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/script_ajustments.png" width="500" alt="Script ajustments">

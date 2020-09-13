@@ -82,4 +82,3 @@ limit_top = -1000
 limit_right = 2920
 limit_bottom = 1980
 script = ExtResource( 2 )
-stop_on_limit = false
