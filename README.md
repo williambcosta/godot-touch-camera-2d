@@ -6,7 +6,7 @@
 - [Mouse inputs support](#mouse-inputs-support)
 - [Move the camera while zooming](#move-the-camera-while-zooming)
 - [Zoom at a specific point](#zoom-at-a-specific-point)
-- [Stop moving on camera's limit](#stop-moving-on-camera's-limit)
+- [Stop moving on camera's limit](#stop-moving-on-cameras-limit)
 - [Known issues](#known-issues)
   - [Control Nodes](#control-nodes)
   - [Emulating touch from mouse](#emulating-touch-from-mouse)
@@ -128,7 +128,7 @@ itself to the limit smoothly
 
 # Known issues
 
-## Control Nodes
+### Control Nodes
 As said above, the camera catches the unhandled inputs to work. But what if
 this events never reaches the camera? Well, the camera will not do anything.
 
@@ -155,7 +155,7 @@ you'll have to test it well to see if it behaves properly.
 **[⬆ back to top](#table-of-contents)**
 
 
-## Emulating touch from mouse
+### Emulating touch from mouse
 If you need to emulate touch from mouse and the  **Handle Mouse Events**
 are set to true, it causes an issue while moving the camera.
 
