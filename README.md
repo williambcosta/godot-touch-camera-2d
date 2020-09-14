@@ -6,7 +6,7 @@
 - [Mouse inputs support](#mouse-inputs-support)
 - [Move the camera while zooming](#move-the-camera-while-zooming)
 - [Zoom at a specific point](#zoom-at-a-specific-point)
-- [Stop moving on camera's limit](#stop-moving-on-camera's-limit)
+- [Stop moving on camera's limit](#stop-moving-on-cameras-limit)
 - [Known issues](#known-issues)
   - [Control Nodes](#control-nodes)
   - [Emulating touch from mouse](#emulating-touch-from-mouse)
