@@ -162,10 +162,8 @@ are set to true, it causes an issue while moving the camera.
 The engine will trigger the camera's `_unhandled_input(event: InputEvent)`
 twice, one for the mouse and one for the emulated touch. For zoom action
 it's not a big of a deal, since this action is handled independently for the
-mouse and touch.
-
-But when moving the camera it causes the drag to double, e.g clicking and
-dragging the mouse 10 pixels, will move the camera 20.
+mouse and touch. But when moving the camera it causes the drag to double, e.g
+clicking and dragging the mouse 10 pixels, will move the camera 20.
 
 So, if you really need to emulate the touch, you'll need to change the script.
 Adjusting the if statement at the line 122 from this
