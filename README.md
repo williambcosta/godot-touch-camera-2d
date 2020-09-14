@@ -175,8 +175,9 @@ and deleting the line 99 as well, should do the trick. The lines 99 thru
     <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/script_ajustments.png" width="500" alt="Script ajustments">
 </p>
 
-**[⬆ back to top](#table-of-contents)**
-
 
 # Contributing
 Feel free to suggest any improvements for the script or for this README translation.
+
+**[⬆ back to top](#table-of-contents)**
+
