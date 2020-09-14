@@ -1,5 +1,19 @@
-# Touch Camera 2D
+### Table of Contents
+- [Introduction](#introduction)
+- [Configuration](#configuration)
+- [Compatibility](#compatibility)
+- [Functioning](#functioning)
+- [Mouse inputs support](#mouse-inputs-support)
+- [Move the camera while zooming](#move-the-camera-while-zooming)
+- [Zoom at a specific point](#zoom-at-a-specific-point)
+- [Stop moving on camera's limit](#stop-moving-on-camera's-limit)
+- [Known issues](#known-issues)
+  - [Control Nodes](#control-nodes)
+  - [Emulating touch from mouse](#emulating-touch-from-mouse)
+- [Contributing](#contributing)
 
+
+# Introduction
 The necessity of a camera with touch inputs support bring me to search the
 web for a solution, without much success.
 
@@ -13,8 +27,10 @@ ajustement.
 It lead me to implement a solution that fit my needs in any scenario
 used. So here it is.
 
-## Configuration
+**[⬆ back to top](#table-of-contents)**
 
+
+# Configuration
 Put the TouchCamera2D.gd script somewhere on your project and make sure
 the class icon path points to the correct svg file (touch_camera_icon.svg)
 or simply delete everything after `class_name TouchCamera2D`.
@@ -38,18 +54,24 @@ Done, it should be ready.
     <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/script_parameters.png" width="250" alt="Parameters">
 </p>
 
-## Compatibility
+**[⬆ back to top](#table-of-contents)**
 
+
+# Compatibility
 For now, the camera script was only tested using the Godot version 3.2.x
 
-## Functioning
+**[⬆ back to top](#table-of-contents)**
 
+
+# Functioning
 The camera captures and interprets the unhandled inputs, so make sure the inputs
 reaches the camera's `_unhandled_input(event: InputEvent)` method. If needed you
 can call it directly by script, like this `camera_reference._unhandled_input(event)`.
 
-## Mouse inputs support
+**[⬆ back to top](#table-of-contents)**
 
+
+# Mouse inputs support
 The camera can handle the mouse inputs right out of the box without the need of
 emulating touch from mouse. If needed, you can ignore the mouse inputs by
 unmarking the **Handle Mouse Inputs** on the Inspector panel.
@@ -61,8 +83,10 @@ unmarking the **Handle Mouse Inputs** on the Inspector panel.
 The mouse inputs supported are left click and drag to pan the camera, and the
 mouse wheel up/down to zoom in and out.
 
-## Move the camera while zooming
+**[⬆ back to top](#table-of-contents)**
 
+
+# Move the camera while zooming
 By default, the camera move the camera while you applying zoom, so you don't
 have to remove a finger to move the camera if needed.
 
@@ -72,8 +96,10 @@ It can be turned off on the Inspector panel by disabling **Move While Zooming**.
     <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/move_while_zooming.gif" width="450" alt="Move camera while zooming">
 </p>
 
-## Zoom at a specific point
+**[⬆ back to top](#table-of-contents)**
 
+
+# Zoom at a specific point
 When applying zoom, is expected that the point you're focused in always
 stays on screen. The camera will do that if the **Zoom At Point** is set
 true on the Inspector panel. Otherwise the camera will zoom in/out relative
@@ -83,8 +109,10 @@ to the camera position.
     <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/zoom_at_point.gif" width="450" alt="Zoom at a specific point">
 </p>
 
-## Stop moving on camera's limit
+**[⬆ back to top](#table-of-contents)**
 
+
+# Stop moving on camera's limit
 If you change the value of the camera's limits, by default, the script will
 stop moving the camera's position to prevent pan issues. But if you desire
 a more smooth action, the script can allow the user mo move the camera
@@ -95,10 +123,12 @@ itself to the limit smoothly
     <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/stop-on-limit.gif" alt="Stop moving on camera's limit">
 </p>
 
-## Known issues
+**[⬆ back to top](#table-of-contents)**
 
-### Control Nodes
 
+# Known issues
+
+## Control Nodes
 As said above, the camera catches the unhandled inputs to work. But what if
 this events never reaches the camera? Well, the camera will not do anything.
 
@@ -122,8 +152,10 @@ A work around, is to manipulate the event's position before calling the
 camera's method, adding the node's position to the event's position. But
 you'll have to test it well to see if it behaves properly.
 
-### Emulating touch from mouse
+**[⬆ back to top](#table-of-contents)**
 
+
+## Emulating touch from mouse
 If you need to emulate touch from mouse and the  **Handle Mouse Events**
 are set to true, it causes an issue while moving the camera.
 
@@ -145,6 +177,8 @@ and deleting the line 99 as well, should do the trick. The lines 99 thru
     <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/script_ajustments.png" width="500" alt="Script ajustments">
 </p>
 
-## Contributing
+**[⬆ back to top](#table-of-contents)**
 
+
+# Contributing
 Feel free to suggest any improvements for the script or for this README translation.
