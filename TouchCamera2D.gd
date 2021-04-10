@@ -137,10 +137,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			set_position(position - event.relative * zoom)
 
 		# If there are more than one finger on screen
-		if events.size() == 2 and events.has_all([0, 1]):
+		if events.size() > 1:
+			# Get index (this is random with window 10 touch)
+			var keys = events.keys()
 			# Stores the touches position
-			var p1: Vector2 = events[0].position
-			var p2: Vector2 = events[1].position
+			var p1: Vector2 = events[keys[0]].position
+			var p2: Vector2 = events[keys[1]].position
 
 			# If move while zooming is set true
 			if move_while_zooming:
