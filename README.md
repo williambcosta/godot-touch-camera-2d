@@ -58,7 +58,7 @@ Done, it should be ready.
 
 
 # Compatibility
-For now, the camera script was only tested using the Godot version 3.2.x
+For now, the camera script was only tested using the Godot version 3.2.x.
 
 **[⬆ back to top](#table-of-contents)**
 
@@ -87,7 +87,7 @@ mouse wheel up/down to zoom in and out.
 
 
 # Move the camera while zooming
-By default, the camera move the camera while you applying zoom, so you don't
+By default, the camera move while you applying zoom, so you don't
 have to remove a finger to move the camera if needed.
 
 It can be turned off on the Inspector panel by disabling **Move While Zooming**.
@@ -103,7 +103,7 @@ It can be turned off on the Inspector panel by disabling **Move While Zooming**.
 When applying zoom, is expected that the point you're focused in always
 stays on screen. The camera will do that if the **Zoom At Point** is set
 true on the Inspector panel. Otherwise the camera will zoom in/out relative
-to the camera position.
+to the camera's position.
 
 <p align="center">
     <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/zoom_at_point.gif" width="450" alt="Zoom at a specific point">
@@ -115,9 +115,9 @@ to the camera position.
 # Stop moving on camera's limit
 If you change the value of the camera's limits, by default, the script will
 stop moving the camera's position to prevent pan issues. But if you desire
-a more smooth action, the script can allow the user mo move the camera
-beyond the limit. After the move action be release the camera will move
-itself to the limit smoothly
+a more smooth action, the script can allow the user to move the camera
+beyond the limit. After the move action be released the camera will move
+itself to the limit smoothly.
 
 <p align="center">
     <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/stop-on-limit.gif" alt="Stop moving on camera's limit">
@@ -157,7 +157,7 @@ you'll have to test it well to see if it behaves properly.
 
 ### Emulating touch from mouse
 If you need to emulate touch from mouse and the  **Handle Mouse Events**
-are set to true, it causes an issue while moving the camera.
+are set true, it causes an issue while moving the camera.
 
 The engine will trigger the camera's `_unhandled_input(event: InputEvent)`
 twice, one for the mouse and one for the emulated touch. For zoom action
@@ -165,15 +165,9 @@ it's not a big of a deal, since this action is handled independently for the
 mouse and touch. But when moving the camera it causes the drag to double, e.g
 clicking and dragging the mouse 10 pixels, will move the camera 20.
 
-So, if you really need to emulate the touch, you'll need to change the script.
-Adjusting the if statement at the line 122 from this
-`if ((event is InputEventScreenDrag)` to this `if event is InputEventScreenDrag:`
-and deleting the line 99 as well, should do the trick. The lines 99 thru
-119 will not be needed anymore so feel free to delete them.
-
-<p align="center">
-    <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/script_ajustments.png" width="500" alt="Script ajustments">
-</p>
+So, if you really need to emulate the touch, you'll need to ajust the script.
+Read the comments in the `_unhandled_input(event: InputEvent)` function for more
+information.
 
 
 # Contributing

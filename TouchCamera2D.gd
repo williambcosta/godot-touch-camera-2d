@@ -98,6 +98,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	# If it's set to handle the mouse events, it's a Left button
 	# and it's pressed
+	# If you need to emulate touch from mouse, to avoid pan issue,
+	# you can delete this section. From here...
 	elif handle_mouse_events and event is InputEventMouseButton:
 		if event.get_button_index() == BUTTON_LEFT:
 			if event.is_pressed():
@@ -117,10 +119,14 @@ func _unhandled_input(event: InputEvent) -> void:
 			if events.has(0):
 				# Erases this event from the dictionary
 				events.erase(0)
+	# ...to here
 
 	# If it's a motion
-	if ((event is InputEventScreenDrag)
+	# if emulate touch is needed...
+	if ((event is InputEventScreenDrag) # ...change to: if event is InputEventScreenDrag:
+			# and delete the next line
 			or (handle_mouse_events and event is InputEventMouseMotion)):
+
 		# If it's a ScreenDrag
 		if event is InputEventScreenDrag:
 			var last_pos: Vector2 = events[event.index].position
