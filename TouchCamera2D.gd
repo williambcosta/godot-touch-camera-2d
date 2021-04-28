@@ -6,10 +6,21 @@ extends Camera2D
 # If set true the camera will stop moving when the limits are reached.
 # Otherwise the camera will continue moving, but will return to the
 # limit smoothly
-export var stop_on_limit: bool = true setget set_stop_on_limit
+export var stop_on_limit: bool = false setget set_stop_on_limit
 
 # The return speed of the camera to the limit
 export var return_speed: float = 0.15
+
+# If true, the camera will continue moving after a fling movement, decelerating
+# over time, until it stops completely
+export var fling_action: bool = true
+
+# Minimum velocity to execute a fling action. In pixels per second
+export var min_fling_velocity: int = 750
+
+# The fling deceleration rate in pixels per second. The higher this number
+# faster the camera will stop
+export(int, 0, 3000) var deceleration = 600
 
 # The minimum camera zoom
 export var min_zoom: float = 0.5
@@ -58,7 +69,22 @@ var limit_target := position
 # If the camera is set to continue moving off limit, the original limits of
 # the camera will be set to maximum possible and this will hold the
 # original limits
-var base_limits:= Rect2(limit_left, limit_top, limit_right, limit_bottom)
+var base_limits := Rect2(limit_left, limit_top, limit_right, limit_bottom)
+
+# Initial velocity of the fling action in the x axis
+var velocity_x: int = 0
+
+# Initial velocity of the fling action in the y axis
+var velocity_y: int = 0
+
+# The position that the action started
+var start_position := Vector2.ZERO
+
+# The time elapsed until the end of the action
+var action_time: float = 0
+
+# Used to mark the "auto scroll" animation after a fling action
+var is_flying: bool = false
 
 
 # Connects the viewport signal
@@ -71,6 +97,9 @@ func _ready() -> void:
 			self,"_on_viewport_size_changed") != OK:
 		# Sets vp_size
 		vp_size = get_viewport().size
+
+	# Sets up the limits
+	set_stop_on_limit(stop_on_limit)
 
 
 # Called every frame
@@ -220,6 +249,11 @@ func _on_viewport_size_changed() -> void:
 		vp_size = get_viewport().get_size_override()
 
 
+# Checks if the camera was flinged with a velocity grater than the minimum allowed
+func was_flinged(start_p: Vector2, end_p: Vector2, dt: float) -> bool:
+	return int(start_p.distance_to(end_p) / dt) >= min_fling_velocity
+
+
 # Sets the camera's zoom making sure it stays between the minimum and maximum
 func set_zoom(new_zoom: Vector2) -> void:
 	new_zoom.x = clamp(new_zoom.x, min_zoom, max_zoom)
@@ -311,7 +345,7 @@ func set_stop_on_limit(stop: bool) -> void:
 		limit_right = base_limits.size.x as int
 		limit_bottom = base_limits.size.y as int
 	else:
-		# Otherwise sets the limits to the "maximum"
+		# Otherwise sets the limits to default values
 		limit_left = -10000000
 		limit_top = -10000000
 		limit_right = 10000000
