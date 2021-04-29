@@ -8,8 +8,9 @@ extends Camera2D
 # limit smoothly
 export var stop_on_limit: bool = false setget set_stop_on_limit
 
-# The return speed of the camera to the limit
-export var return_speed: float = 0.15
+# The return speed of the camera to the limit. The higher this number
+# faster the camera will return to the limit
+export(float, 0.01, 1, 0.01) var return_speed = 0.15
 
 # If true, the camera will continue moving after a fling movement, decelerating
 # over time, until it stops completely
