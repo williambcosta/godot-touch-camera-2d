@@ -81,11 +81,14 @@ var velocity_y: int = 0
 # The position that the action started
 var start_position := Vector2.ZERO
 
-# The time elapsed until the end of the action
+# The time elapsed until the end of the fling action
 var action_time: float = 0
 
 # Used to mark the "auto scroll" animation after a fling action
 var is_flying: bool = false
+
+# The duration of the flying motion
+var duration: float = 0
 
 
 # Connects the viewport signal
@@ -250,9 +253,61 @@ func _on_viewport_size_changed() -> void:
 		vp_size = get_viewport().get_size_override()
 
 
-# Checks if the camera was flinged with a velocity grater than the minimum allowed
+# Checks if the camera was flinged with a velocity greater than the minimum allowed
 func was_flinged(start_p: Vector2, end_p: Vector2, dt: float) -> bool:
-	return int(start_p.distance_to(end_p) / dt) >= min_fling_velocity
+	# Calculates the initial velocity of the action
+	var vi := int(start_p.distance_to(end_p) / dt)
+
+	# If the distance from the start point to the end divided by the time taken
+	# to perform the action is greater or equals to the minimum fling velocity,
+	# then the fling action was performed. Otherwise, the action was too
+	# slow to be considered
+	if vi >= min_fling_velocity:
+		# Calculates the velocity for each axis
+		velocity_x = int((start_p.x - end_p.x) / dt)
+		velocity_y = int((start_p.y - end_p.y) / dt)
+
+		# Marks the camera as flying so it can be animated
+		is_flying = true
+
+		# Calculates the duration of the animation
+		duration = abs(vi/deceleration)
+	else:
+		# If the movement was too slow, ignore it
+		is_flying = false
+
+	return is_flying
+
+
+# Moves the camera based on the velocity
+func fling(vx: int, vy: int, dt: float) -> void:
+	# Calculates the remaining time of the animation
+	duration -= dt
+
+	# If there's time remaining...
+	if duration > 0.0:
+		# Calculates the next camera's position for both axis
+		var npx = position.x + vx * dt
+		var npy = position.y + vy * dt
+
+		# Moves the camera to the next position
+		set_position(Vector2(npx, npy))
+
+		# Calculates the next velocity for both axis considering the deceleration
+		velocity_x = int(vx - deceleration * dt if vx >= 0 else vx + deceleration * dt)
+		velocity_y = int(vy - deceleration * dt if vy >= 0 else vy + deceleration * dt)
+
+	# Otherwise finishes the animation
+	else:
+		finish_flying()
+
+	return
+
+
+# Finishes the animation
+func finish_flying() -> void:
+	duration = 0
+	is_flying = false
 
 
 # Sets the camera's zoom making sure it stays between the minimum and maximum
