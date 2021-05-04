@@ -26,10 +26,14 @@ config/icon="res://icon.png"
 
 [display]
 
-window/size/width=900
+window/size/width=960
 window/size/height=540
 window/stretch/mode="2d"
 window/stretch/aspect="keep"
+
+[global]
+
+log=false
 
 [input_devices]
 
