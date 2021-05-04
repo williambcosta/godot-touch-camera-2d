@@ -81,9 +81,9 @@ var velocity_y: float = 0.0
 # The position that the action started
 var start_position := Vector2.ZERO
 
-# The event index relative to the fling action. In case of multi touch events
-# only one of them will be considerate
-var sp_idx: int = 0
+# Multi touch events can trigger an undesered fling action. This flag disables
+# the fling action temporarily
+var ignore_fling : bool = false
 
 # Used to mark the "auto scroll" animation after a fling action
 var is_flying: bool = false
@@ -93,7 +93,7 @@ var is_moving: bool = false
 
 # Used to mark he duration of the flying motion or the time elapsed until the
 # end of the fling action
-var duration: float = 0.0
+var duration: float = 0.0001
 
 # Used to calculate the deceleration of the x axis
 var dx: float = 0.0
@@ -149,6 +149,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			# Stores the event in the dictionary
 			events[event.index] = event
 
+			# If there is more than one finger at the screen, ignores the fling action
+			if events.size() > 1:
+				ignore_fling = true
+
 			# Sets the camera as moving if the fling action is activated
 			is_moving = true and fling_action
 
@@ -157,27 +161,27 @@ func _unhandled_input(event: InputEvent) -> void:
 				# Stores the event start position to calculate the velocity later
 				start_position = event.position
 
-				# Stores the start point index to avoid issues with multi touches
-				sp_idx = events.keys()[0]
-
 			# In case the camera was flying, stops it
 			finish_flying()
 
 		# If it's not pressed
 		else:
-			# If there is only one touch and it's the same as the start position
-			if events.size() == 1 and events.has(sp_idx):
+			if duration > 0 and is_moving and not ignore_fling:
 				# Unset the camera moving flag
 				is_moving = false
 
-				# If the fling action is activated
-				if fling_action:
+				# If the fling action is activated and it's not to ignore the fling action
+				if fling_action and not ignore_fling:
 					# Verify if the camera was flinged. If so, set as flying
 					if was_flinged(start_position, event.position, duration):
 						is_flying = true
 
 			# Erases this event from the dictionary
 			events.erase(event.index)
+
+			# The fling action will be ignored until the last finger leave the screen
+			if events.size() == 0:
+				ignore_fling = false
 
 # TODO: Remover redundância
 
@@ -219,15 +223,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			# and delete the next line
 			or (handle_mouse_events and event is InputEventMouseMotion)):
 
-		# If the camera is moving. Updates the start position every 0.2 seconds	
+		# If the camera is moving. Updates the start position every 0.2 seconds
 		# This is needed to avoid fling the camera after the user perform a swipe
 		# action, e.g. when the user moves the camera very fast and stops while
 		# keep the finger on the screen
-		if duration > 0.2 and is_moving:
-			duration = 0.000001
-			
-			if events.size() == 1:
-				start_position = event.position
+		if duration > 0.2 and is_moving and not ignore_fling:
+			duration = 0.0001
+			start_position = event.position
 
 		# If it's a ScreenDrag
 		if event is InputEventScreenDrag:
@@ -394,7 +396,7 @@ func finish_flying() -> void:
 func set_zoom(new_zoom: Vector2) -> void:
 	new_zoom.x = clamp(new_zoom.x, min_zoom, max_zoom)
 	zoom = Vector2.ONE * new_zoom.x
-	
+
 	# If the zoom change the valid limits need to be calculated again
 	calculate_valid_limits()
 
@@ -440,12 +442,12 @@ func is_camera_out_of_limit() -> bool:
 #
 # Originally, if the anchor mode is set to, for exemple, Top Left, and you set a limit
 # at 1000x1000, the camera will stop render when its position reach the 1000x1000,
-# however with the anchor at the top left, the position of the camera will be relative to 
+# however with the anchor at the top left, the position of the camera will be relative to
 # the top left pixel of the viewport. But the bottom left pixel will be after that.
 # In other words the camera will render more than you want.
 #
 # This function calculate another limit based on the one you set at the properties
-# panel, restricting the camera's position ensuring that the viewport will be 
+# panel, restricting the camera's position ensuring that the viewport will be
 # always inside the limits. So the left side of the viewport will never be less
 # than the left limit, as well as the right side won't be bigger than the right
 # limit. The same with the top and bottom. Independent of the anchor mode
