@@ -21,7 +21,7 @@ export var min_fling_velocity: float = 100.0
 
 # The fling deceleration rate in pixels per second. The higher this number
 # faster the camera will stop. It have a 10000 limit but can be higher
-export(float, 1.0, 10000.0) var deceleration: float = 1500.0
+export(float, 1.0, 10000.0) var deceleration: float = 2500.0
 
 # The minimum camera zoom
 export var min_zoom: float = 0.5
@@ -78,8 +78,14 @@ var velocity_x: float = 0.0
 # Initial velocity of the fling action in the y axis
 var velocity_y: float = 0.0
 
-# The position that the action started
+# The start position of the fling action
 var start_position := Vector2.ZERO
+
+# The end position of the fling action
+var end_position := Vector2.ZERO
+
+# The time taken to make the fling action
+var fling_time: float = 0.0001
 
 # Multi touch events can trigger an undesered fling action. This flag disables
 # the fling action temporarily
@@ -170,6 +176,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			if events.size() == 1:
 				# Stores the event start position to calculate the velocity later
 				start_position = event.position
+				end_position = start_position
 
 			# In case the camera was flying, stops it
 			finish_flying()
@@ -183,7 +190,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				# If the fling action is activated and it's not to ignore the fling action
 				if fling_action and not ignore_fling:
 					# Verify if the camera was flinged. If so, set as flying
-					if was_flinged(start_position, event.position, duration):
+					if was_flinged(start_position, end_position, fling_time):
 						is_flying = true
 
 			# Erases this event from the dictionary
@@ -208,12 +215,14 @@ func _unhandled_input(event: InputEvent) -> void:
 	if ((event is InputEventScreenDrag)
 			or (handle_mouse_events and event is InputEventMouseMotion)):
 
-		# If the camera is moving. Updates the start position every 0.2 seconds
+		# If the camera is moving. Updates the start position every 0.02 seconds
 		# This is needed to avoid fling the camera after the user perform a swipe
 		# action, e.g. when the user moves the camera very fast and stops while
 		# keep the finger on the screen
-		if duration > 0.2 and is_moving and not ignore_fling:
+		if duration > 0.02 and is_moving and not ignore_fling:
+			fling_time = duration
 			duration = 0.0001
+			end_position = start_position
 			start_position = event.position
 
 		# If it's a ScreenDrag
@@ -312,7 +321,7 @@ func _on_viewport_size_changed() -> void:
 # and calculate the x/y velocity and deceleration rate
 func was_flinged(start_p: Vector2, end_p: Vector2, dt: float) -> bool:
 	# Calculates the initial velocity of the action
-	var vi: float = start_p.distance_to(end_p) / dt
+	var vi: float = end_p.distance_to(start_p) / dt
 
 	# Calculates how much time the animation will last
 	duration = vi / deceleration
@@ -323,8 +332,8 @@ func was_flinged(start_p: Vector2, end_p: Vector2, dt: float) -> bool:
 	# slow to be considered
 	if vi >= min_fling_velocity:
 		# Calculates the velocity for each axis
-		velocity_x = (start_p.x - end_p.x) / dt
-		velocity_y = (start_p.y - end_p.y) / dt
+		velocity_x = (end_p.x - start_p.x) / dt
+		velocity_y = (end_p.y - start_p.y) / dt
 
 		# To avoid an axis from stop before the other, each one will have a its
 		# own deceleration rate. Calculates the deceleration needed to the x and
