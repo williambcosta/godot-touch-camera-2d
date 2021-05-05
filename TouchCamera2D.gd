@@ -142,12 +142,22 @@ func _process(_delta) -> void:
 # Captures the unhandled inputs to verify the action to be executed by
 # the camera
 func _unhandled_input(event: InputEvent) -> void:
-	# If the event is a touch
-	if event is InputEventScreenTouch:
-		# And it's pressed
+	if (event is InputEventScreenTouch
+			or handle_mouse_events and event is InputEventMouseButton
+			and event.get_button_index() == BUTTON_LEFT):
+
+		# The InputEventMouseButton doesn't have a index, so if that's the
+		# case the index will be 0
+		var i
+		if event is InputEventMouseButton and event.get_button_index() == BUTTON_LEFT:
+			i = 0
+		else:
+			i = event.index
+
+		# If the event is pressed
 		if event.is_pressed():
 			# Stores the event in the dictionary
-			events[event.index] = event
+			events[i] = event
 
 			# If there is more than one finger at the screen, ignores the fling action
 			if events.size() > 1:
@@ -177,50 +187,25 @@ func _unhandled_input(event: InputEvent) -> void:
 						is_flying = true
 
 			# Erases this event from the dictionary
-			events.erase(event.index)
+			events.erase(i)
 
 			# The fling action will be ignored until the last finger leave the screen
 			if events.size() == 0:
 				ignore_fling = false
 
-# TODO: Remover redundância
-
-	# If it's set to handle the mouse events, it's a Left button and it's pressed
-	# If you need to emulate touch from mouse, to avoid pan issue, you can
-	# delete this section. From here...
-	elif handle_mouse_events and event is InputEventMouseButton:
-		if event.get_button_index() == BUTTON_LEFT:
-			if event.is_pressed():
-				# Stores the event in the dictionary
-				events[0] = event
-				is_moving = true and fling_action
-				start_position = event.position
-				finish_flying()
-
-			# If it's not pressed
-			else:
-				# Erases this event from the dictionary
-				events.erase(0)
-				is_moving = false
-
-				if fling_action:
-					if was_flinged(start_position, event.position, duration):
-						is_flying = true
-
-		# If move while zooming is set true it means that the event stored
-		# have to stay in the dictionary to allow the camera to move
-		# Otherwise it can be erased
-		elif not move_while_zooming:
-			# Checks if the key exists
-			if events.has(0):
-				# Erases this event from the dictionary
-				events.erase(0)
-	# ...to here
+	# If move while zooming is set true it means that the event stored
+	# have to stay in the dictionary to allow the camera to move
+	# Otherwise it can be erased
+	if (not move_while_zooming and handle_mouse_events
+			and event is InputEventMouseButton
+			and event.get_button_index() != BUTTON_LEFT):
+		# Checks if the key exists
+		if events.has(0):
+			# Erases this event from the dictionary
+			events.erase(0)
 
 	# If it's a motion
-	# if emulate touch is needed...
-	if ((event is InputEventScreenDrag) # ...change to: if event is InputEventScreenDrag:
-			# and delete the next line
+	if ((event is InputEventScreenDrag)
 			or (handle_mouse_events and event is InputEventMouseMotion)):
 
 		# If the camera is moving. Updates the start position every 0.2 seconds
