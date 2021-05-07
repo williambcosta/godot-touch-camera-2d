@@ -7,6 +7,7 @@
 - [Move the camera while zooming](#move-the-camera-while-zooming)
 - [Zoom at a specific point](#zoom-at-a-specific-point)
 - [Stop moving on camera's limit](#stop-moving-on-cameras-limit)
+- [Fling animation](#fling-animation)
 - [Known issues](#known-issues)
   - [Control Nodes](#control-nodes)
   - [Emulating touch from mouse](#emulating-touch-from-mouse)
@@ -58,7 +59,7 @@ Done, it should be ready.
 
 
 # Compatibility
-For now, the camera script was only tested using the Godot version 3.2.x.
+Tested using the Godot versions 3.2+
 
 **[⬆ back to top](#table-of-contents)**
 
@@ -67,6 +68,9 @@ For now, the camera script was only tested using the Godot version 3.2.x.
 The camera captures and interprets the unhandled inputs, so make sure the inputs
 reaches the camera's `_unhandled_input(event: InputEvent)` method. If needed you
 can call it directly by script, like this `camera_reference._unhandled_input(event)`.
+The camera supports touch and drag (or click and drag) to move the camera's position,
+two fingers zoom in/out (or mouse wheel) and [fling animation](#fling-animation) to
+fast move the camera.
 
 **[⬆ back to top](#table-of-contents)**
 
@@ -126,6 +130,22 @@ itself to the limit smoothly.
 **[⬆ back to top](#table-of-contents)**
 
 
+# Fling animation
+A fling animation occurs when the user make a fast swipe motion releasing
+the finger of the screen immediately after the action. It causes the camera
+to move with an initial velocity and gradually slows down until it stops.
+
+In the properties panel you can turn off the fling animation or adjust the
+deceleration rate of the camera, as well as the minimum velocity to be
+considerate to perform a fling motion.
+
+<p align="center">
+    <img src="https://raw.githubusercontent.com/williambcosta/godot-touch-camera-2d/master/screenshots/fling.gif" width="450" alt="Fling action">
+</p>
+
+**[⬆ back to top](#table-of-contents)**
+
+
 # Known issues
 
 ### Control Nodes
@@ -166,8 +186,9 @@ mouse and touch. But when moving the camera it causes the drag to double, e.g
 clicking and dragging the mouse 10 pixels, will move the camera 20.
 
 So, if you really need to emulate the touch, you'll need to ajust the script.
-Read the comments in the `_unhandled_input(event: InputEvent)` function for more
-information.
+Just delete everything related to the mouse inputs from the code. Again,
+the zoom action is not affected for the emulated touch. So you can leave it
+there if you want.
 
 
 # Contributing
