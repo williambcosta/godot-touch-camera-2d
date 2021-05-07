@@ -69,7 +69,7 @@ The camera captures and interprets the unhandled inputs, so make sure the inputs
 reaches the camera's `_unhandled_input(event: InputEvent)` method. If needed you
 can call it directly by script, like this `camera_reference._unhandled_input(event)`.
 The camera supports touch and drag (or click and drag) to move the camera's position,
-two fingers zoom in/out (or mouse wheel) and [fling animation](#fling-animation) to
+two fingers pinch to zoom in/out (or mouse wheel) and [fling animation](#fling-animation) to
 fast move the camera.
 
 **[⬆ back to top](#table-of-contents)**
