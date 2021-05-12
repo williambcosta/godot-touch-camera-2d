@@ -222,8 +222,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		if duration > 0.02 and is_moving and not ignore_fling:
 			fling_time = duration
 			duration = 0.0001
-			end_position = start_position
-			start_position = event.position
+			start_position = end_position
+			end_position = event.position
 
 		# If it's a ScreenDrag
 		if event is InputEventScreenDrag:
@@ -321,7 +321,7 @@ func _on_viewport_size_changed() -> void:
 # and calculate the x/y velocity and deceleration rate
 func was_flinged(start_p: Vector2, end_p: Vector2, dt: float) -> bool:
 	# Calculates the initial velocity of the action
-	var vi: float = end_p.distance_to(start_p) / dt
+	var vi: float = start_p.distance_to(end_p) / dt
 
 	# Calculates how much time the animation will last
 	duration = vi / deceleration
@@ -332,8 +332,8 @@ func was_flinged(start_p: Vector2, end_p: Vector2, dt: float) -> bool:
 	# slow to be considered
 	if vi >= min_fling_velocity:
 		# Calculates the velocity for each axis
-		velocity_x = (end_p.x - start_p.x) / dt
-		velocity_y = (end_p.y - start_p.y) / dt
+		velocity_x = (start_p.x - end_p.x) / dt
+		velocity_y = (start_p.y - end_p.y) / dt
 
 		# To avoid an axis from stop before the other, each one will have a its
 		# own deceleration rate. Calculates the deceleration needed to the x and
