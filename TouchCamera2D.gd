@@ -30,10 +30,10 @@ export var min_zoom: float = 0.5
 export var max_zoom: float = 2
 
 # Represents the amount of pixels traveled before the zoom action begins
-export var zoom_sensitivity: int = 10
+export var zoom_sensitivity: int = 5
 
 # How much the zoom will be incremented/decremented when the action happens
-export var zoom_increment: Vector2 = Vector2(0.05, 0.05)
+export var zoom_increment: Vector2 = Vector2(0.025, 0.025)
 
 # If set true, the camera's position will be relative to a specific point
 # when zooming (the mouse cursor or the middle point between the fingers)
@@ -46,6 +46,9 @@ export var move_while_zooming: bool = true
 # If true, allows the mouse wheel to change the zoom, and click and drag
 # to pan the camera (without the need of emulating touch from mouse)
 export var handle_mouse_events: bool = true
+
+# How much the zoom will be incremented/decremented using the mouse wheel
+export var mouse_zoom_increment: Vector2 = Vector2(0.1, 0.1)
 
 # The last distance between two touches.
 # The last_pinch_distance will be compared to the current pinch distance to
@@ -292,16 +295,16 @@ func _unhandled_input(event: InputEvent) -> void:
 			# Wheel up = zoom-in
 			if event.get_button_index() == BUTTON_WHEEL_UP:
 				if zoom_at_point:
-					zoom_at(zoom - zoom_increment, event.position)
+					zoom_at(zoom - mouse_zoom_increment, event.position)
 				else:
-					zoom_at(zoom - zoom_increment, position)
+					zoom_at(zoom - mouse_zoom_increment, position)
 
 			# Wheel down = zoom-out
 			if event.get_button_index() == BUTTON_WHEEL_DOWN:
 				if zoom_at_point:
-					zoom_at(zoom + zoom_increment, event.position)
+					zoom_at(zoom + mouse_zoom_increment, event.position)
 				else:
-					zoom_at(zoom + zoom_increment, position)
+					zoom_at(zoom + mouse_zoom_increment, position)
 
 
 # Updates the reference vp_size properly when the viewport change size
