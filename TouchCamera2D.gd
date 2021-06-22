@@ -33,7 +33,7 @@ export var max_zoom: float = 2
 export var zoom_sensitivity: int = 5
 
 # How much the zoom will be incremented/decremented when the action happens
-export var zoom_increment: Vector2 = Vector2(0.025, 0.025)
+export var zoom_increment: Vector2 = Vector2(0.02, 0.02)
 
 # If set true, the camera's position will be relative to a specific point
 # when zooming (the mouse cursor or the middle point between the fingers)
@@ -180,6 +180,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				# Stores the event start position to calculate the velocity later
 				start_position = event.position
 				end_position = start_position
+				last_pinch_distance = 0
 
 			# In case the camera was flying, stops it
 			finish_flying()
@@ -202,6 +203,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			# The fling action will be ignored until the last finger leave the screen
 			if events.size() == 0:
 				ignore_fling = false
+				is_moving = false
 
 	# If move while zooming is set true it means that the event stored
 	# have to stay in the dictionary to allow the camera to move
@@ -260,19 +262,18 @@ func _unhandled_input(event: InputEvent) -> void:
 			# Calculates the distance between them
 			var pinch_distance: float = p1.distance_to(p2)
 
+			if last_pinch_distance == 0:
+				last_pinch_distance = pinch_distance
+
 			# If the absolute difference between the last and the
 			# current pinch distance is greater than the zoom sensitivity
 			if abs(pinch_distance - last_pinch_distance) > zoom_sensitivity:
 				var new_zoom: Vector2
-
-				# If the pinch distance is lower than the last pinch distance
-				# it means that a zoom-out action is happening
-				if pinch_distance < last_pinch_distance:
-					new_zoom = (zoom + zoom_increment)
-
-				# Otherwise a zoom-in
-				else:
-					new_zoom = (zoom - zoom_increment)
+				
+				if (pinch_distance < last_pinch_distance):
+					new_zoom = zoom + zoom_increment * zoom  
+				else: 
+					new_zoom = zoom - zoom_increment * zoom
 
 				# If zoom at point is true
 				if zoom_at_point:
@@ -280,10 +281,10 @@ func _unhandled_input(event: InputEvent) -> void:
 					# to keep the focused point at screen
 					# In case of pinch to zoom, the focus will be the
 					# average point between the fingers
-					zoom_at(new_zoom * Vector2.ONE, (p1 + p2) / 2)
+					zoom_at(new_zoom, (p1 + p2) / 2)
 				else:
 					# Otherwise, just updates de camera's zoom
-					zoom_at(new_zoom * Vector2.ONE, position)
+					zoom_at(new_zoom, position)
 
 				# Stores the current pinch_distance as the last for future use
 				last_pinch_distance = pinch_distance
