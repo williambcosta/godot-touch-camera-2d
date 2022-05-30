@@ -291,17 +291,33 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	# If the mouse events is set to be handled
 	elif handle_mouse_events:
-		if event is InputEventMouseButton and event.is_pressed():
-
+		var zoom_by_scroll = event is InputEventMouseButton and event.is_pressed()
+		var zoom_by_touch_scroll = event is InputEventPanGesture and abs(event.delta.y) > abs(event.delta.x)
+		var zoom_by_trackpad = event is InputEventMagnifyGesture
+		
+		if zoom_by_scroll or zoom_by_touch_scroll or zoom_by_trackpad:
+			var zoom_in: bool
+			var zoom_out: bool
+			
+			if zoom_by_scroll:
+				zoom_in = event.get_button_index() == BUTTON_WHEEL_UP
+				zoom_out = event.get_button_index() == BUTTON_WHEEL_DOWN
+			elif zoom_by_touch_scroll:
+				zoom_in = event.delta.y > 0
+				zoom_out = event.delta.y < 0
+			elif zoom_by_trackpad:
+				zoom_in = event.factor > 1
+				zoom_out = event.factor < 1
+			
 			# Wheel up = zoom-in
-			if event.get_button_index() == BUTTON_WHEEL_UP:
+			if zoom_in:
 				if zoom_at_point:
 					zoom_at(zoom - mouse_zoom_increment, event.position)
 				else:
 					zoom_at(zoom - mouse_zoom_increment, position)
 
 			# Wheel down = zoom-out
-			if event.get_button_index() == BUTTON_WHEEL_DOWN:
+			if zoom_out:
 				if zoom_at_point:
 					zoom_at(zoom + mouse_zoom_increment, event.position)
 				else:
