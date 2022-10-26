@@ -306,9 +306,11 @@ func _unhandled_input(event: InputEvent) -> void:
 				zoom_in = event.delta.y > 0
 				zoom_out = event.delta.y < 0
 			elif zoom_by_trackpad:
-				zoom_in = event.factor > 1
-				zoom_out = event.factor < 1
-			
+				var distance = (1 - event.factor)
+				var zoom_position = event.position if zoom_at_point else position
+				zoom_at(zoom + Vector2(distance, distance), zoom_position)
+				return
+
 			# Wheel up = zoom-in
 			if zoom_in:
 				if zoom_at_point:
