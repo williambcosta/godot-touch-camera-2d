@@ -110,6 +110,13 @@ var dx: float = 0.0
 # Used to calculate the deceleration of the y axis
 var dy: float = 0.0
 
+# Used to mark whether zoom has reached minimum, to prevent additional movement
+# when reached.
+var zoomed_to_min = false
+
+# Used to mark whether zoom has reached maximum, to prevent additional movement
+# when reached.
+var zoomed_to_max = false
 
 # Connects the viewport signal
 func _ready() -> void:
@@ -269,10 +276,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			# current pinch distance is greater than the zoom sensitivity
 			if abs(pinch_distance - last_pinch_distance) > zoom_sensitivity:
 				var new_zoom: Vector2
-				
+
 				if (pinch_distance < last_pinch_distance):
-					new_zoom = zoom + zoom_increment * zoom  
-				else: 
+					new_zoom = zoom + zoom_increment * zoom
+				else:
 					new_zoom = zoom - zoom_increment * zoom
 
 				# If zoom at point is true
@@ -294,11 +301,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		var zoom_by_scroll = event is InputEventMouseButton and event.is_pressed()
 		var zoom_by_touch_scroll = event is InputEventPanGesture and abs(event.delta.y) > abs(event.delta.x)
 		var zoom_by_trackpad = event is InputEventMagnifyGesture
-		
+
 		if zoom_by_scroll or zoom_by_touch_scroll or zoom_by_trackpad:
 			var zoom_in: bool
 			var zoom_out: bool
-			
+
 			if zoom_by_scroll:
 				zoom_in = event.get_button_index() == BUTTON_WHEEL_UP
 				zoom_out = event.get_button_index() == BUTTON_WHEEL_DOWN
@@ -408,6 +415,19 @@ func finish_flying() -> void:
 
 # Sets the camera's zoom making sure it stays between the minimum and maximum
 func set_zoom(new_zoom: Vector2) -> void:
+	zoomed_to_min = false
+	zoomed_to_max = false
+
+	if new_zoom.x <= min_zoom:
+		zoomed_to_min = true
+		zoom = Vector2(min_zoom, min_zoom)
+		return
+
+	if new_zoom.x >= max_zoom:
+		zoomed_to_max = true
+		zoom = Vector2(max_zoom, max_zoom)
+		return
+
 	new_zoom.x = clamp(new_zoom.x, min_zoom, max_zoom)
 	zoom = Vector2.ONE * new_zoom.x
 
@@ -417,6 +437,9 @@ func set_zoom(new_zoom: Vector2) -> void:
 
 # Sets the zoom and positions the camera to keep the focused point at screen
 func zoom_at(new_zoom: Vector2, point: Vector2) -> void:
+	# In case the camera was flying, stops it
+	finish_flying()
+
 	# Holds the difference between the updated and the current zoom
 	var zoom_diff: Vector2
 	zoom_diff = new_zoom - zoom
@@ -427,20 +450,19 @@ func zoom_at(new_zoom: Vector2, point: Vector2) -> void:
 	# prevents it
 	new_zoom.x = stepify(new_zoom.x, 0.01)
 
-	# Ensures that the zoom will reach the min/max value
-	if ((zoom_diff.x > 0 and new_zoom.x < max_zoom + zoom_diff.x)
-				or (zoom_diff.x < 0 and new_zoom.x > min_zoom + zoom_diff.x)):
+	# If the camera's anchor is set to center
+	if anchor_mode == ANCHOR_MODE_DRAG_CENTER:
+		# Updates the focused point value to be relative to the center
+		# of the screen
+		point -= vp_size/2
 
-			# If the camera's anchor is set to center
-			if anchor_mode == ANCHOR_MODE_DRAG_CENTER:
-				# Updates the focused point value to be relative to the center
-				# of the screen
-				point -= vp_size/2
+	# Sets the new zoom
+	set_zoom(new_zoom)
 
-			# Sets the new zoom and the camera's position to keep the focus
-			# point on screen
-			set_zoom(new_zoom)
-			set_position(position - (point * zoom_diff))
+	# If setting the zoom hasn't reached a maximum or minimum
+	if !zoomed_to_min and !zoomed_to_max:
+		# Sets the camera's position to keep the focus point on screen
+		set_position(position - (point * zoom_diff))
 
 
 # Returns if the camera's position is out of the valid limit
