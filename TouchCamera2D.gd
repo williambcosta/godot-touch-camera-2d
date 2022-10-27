@@ -444,12 +444,6 @@ func zoom_at(new_zoom: Vector2, point: Vector2) -> void:
 	var zoom_diff: Vector2
 	zoom_diff = new_zoom - zoom
 
-	# For some reason, sometimes the calculation for the next_zoom loses 0.000001
-	# e.g. instead of increasing from 1.50 to 1.55 it changes to 1.549999 which
-	# causes weird behaviours when changing the zoom. Stepifying new_zoom.x
-	# prevents it
-	new_zoom.x = stepify(new_zoom.x, 0.01)
-
 	# If the camera's anchor is set to center
 	if anchor_mode == ANCHOR_MODE_DRAG_CENTER:
 		# Updates the focused point value to be relative to the center
