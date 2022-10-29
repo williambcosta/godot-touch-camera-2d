@@ -3,6 +3,10 @@ class_name TouchCamera2D, "res://touch_camera_icon.svg"
 
 extends Camera2D
 
+# Different configurable behaviors for trackpads. This can be set with
+# `trackpad_pan_behavior`.
+enum TrackpadPanBehavior { ZOOM, PAN }
+
 # If set true the camera will stop moving when the limits are reached.
 # Otherwise the camera will continue moving, but will return to the
 # limit smoothly
@@ -49,6 +53,14 @@ export var handle_mouse_events: bool = true
 
 # How much the zoom will be incremented/decremented using the mouse wheel
 export var mouse_zoom_increment: Vector2 = Vector2(0.1, 0.1)
+
+# Which behavior for two finger gestures when using a trackpad:
+# * PAN is controlled like other apps that scroll
+# * ZOOM is controlled by dragging two fingers up or down
+export(TrackpadPanBehavior) var trackpad_pan_behavior = TrackpadPanBehavior.PAN
+
+# The speed multiplier to pan at.
+export var trackpad_pan_speed: float = 10
 
 # The last distance between two touches.
 # The last_pinch_distance will be compared to the current pinch distance to
@@ -158,6 +170,10 @@ func _process(_delta) -> void:
 # Captures the unhandled inputs to verify the action to be executed by
 # the camera
 func _unhandled_input(event: InputEvent) -> void:
+	if trackpad_pan_behavior == TrackpadPanBehavior.PAN and event is InputEventPanGesture:
+		set_position(position + event.delta * trackpad_pan_speed)
+		return
+
 	if (event is InputEventScreenTouch
 			or handle_mouse_events and event is InputEventMouseButton
 			and event.get_button_index() == BUTTON_LEFT):
@@ -299,7 +315,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	# If the mouse events is set to be handled
 	elif handle_mouse_events:
 		var zoom_by_scroll = event is InputEventMouseButton and event.is_pressed()
-		var zoom_by_touch_scroll = event is InputEventPanGesture and abs(event.delta.y) > abs(event.delta.x)
+		var zoom_by_touch_scroll = event is InputEventPanGesture and trackpad_pan_behavior == TrackpadPanBehavior.ZOOM and abs(event.delta.y) > abs(event.delta.x)
 		var zoom_by_trackpad = event is InputEventMagnifyGesture
 
 		if zoom_by_scroll or zoom_by_touch_scroll or zoom_by_trackpad:
