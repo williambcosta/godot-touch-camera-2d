@@ -1,6 +1,4 @@
-# Make sure the icon path points to the correct location
-class_name TouchCamera2D, "res://touch_camera_icon.svg"
-
+class_name TouchCamera2D
 extends Camera2D
 
 # Different configurable behaviors for trackpads. This can be set with
@@ -10,57 +8,60 @@ enum TrackpadPanBehavior { ZOOM, PAN }
 # If set true the camera will stop moving when the limits are reached.
 # Otherwise the camera will continue moving, but will return to the
 # limit smoothly
-export var stop_on_limit: bool = false setget set_stop_on_limit
+@export var stop_on_limit: bool = false:
+	set(value):
+		stop_on_limit = value
+		set_stop_on_limit(value)
 
 # The return speed of the camera to the limit. The higher this number
 # faster the camera will return to the limit
-export(float, 0.01, 1, 0.01) var return_speed = 0.15
+@export_range(0.01, 1, 0.01) var return_speed: float = 0.15
 
 # If true, the camera will continue moving after a fling movement, decelerating
 # over time, until it stops completely
-export var fling_action: bool = true
+@export var fling_action: bool = true
 
 # Minimum velocity to execute a fling action. In pixels per second
-export var min_fling_velocity: float = 100.0
+@export var min_fling_velocity: float = 100.0
 
 # The fling deceleration rate in pixels per second. The higher this number
 # faster the camera will stop. It have a 10000 limit but can be higher
-export(float, 1.0, 10000.0) var deceleration: float = 2500.0
+@export_range(1.0, 10000.0) var deceleration: float = 2500.0
 
 # The minimum camera zoom
-export var min_zoom: float = 0.5
+@export var min_zoom: float = 0.5
 
 # The maximum camera zoom
-export var max_zoom: float = 2
+@export var max_zoom: float = 2
 
 # Represents the amount of pixels traveled before the zoom action begins
-export var zoom_sensitivity: int = 5
+@export var zoom_sensitivity: int = 5
 
 # How much the zoom will be incremented/decremented when the action happens
-export var zoom_increment: Vector2 = Vector2(0.02, 0.02)
+@export var zoom_increment: Vector2 = Vector2(0.02, 0.02)
 
 # If set true, the camera's position will be relative to a specific point
 # when zooming (the mouse cursor or the middle point between the fingers)
-export var zoom_at_point: bool = true
+@export var zoom_at_point: bool = true
 
 # If true the camera can be moved while zooming
 # Relevant only for pinch to zoom actions
-export var move_while_zooming: bool = true
+@export var move_while_zooming: bool = true
 
 # If true, allows the mouse wheel to change the zoom, and click and drag
 # to pan the camera (without the need of emulating touch from mouse)
-export var handle_mouse_events: bool = true
+@export var handle_mouse_events: bool = true
 
 # How much the zoom will be incremented/decremented using the mouse wheel
-export var mouse_zoom_increment: Vector2 = Vector2(0.1, 0.1)
+@export var mouse_zoom_increment: Vector2 = Vector2(0.1, 0.1)
 
 # Which behavior for two finger gestures when using a trackpad:
 # * PAN is controlled like other apps that scroll
 # * ZOOM is controlled by dragging two fingers up or down
-export(TrackpadPanBehavior) var trackpad_pan_behavior = TrackpadPanBehavior.PAN
+@export var trackpad_pan_behavior: TrackpadPanBehavior = TrackpadPanBehavior.PAN
 
 # The speed multiplier to pan at.
-export var trackpad_pan_speed: float = 10
+@export var trackpad_pan_speed: float = 10
 
 # The last distance between two touches.
 # The last_pinch_distance will be compared to the current pinch distance to
@@ -140,7 +141,7 @@ func _ready() -> void:
 
 	# If the signal connection is not OK
 	if get_viewport().connect("size_changed",
-			self,"_on_viewport_size_changed") != OK:
+			Callable(self,"_on_viewport_size_changed")) != OK:
 		# Sets the view port size
 		vp_size = get_viewport().size
 
@@ -176,12 +177,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if (event is InputEventScreenTouch
 			or handle_mouse_events and event is InputEventMouseButton
-			and event.get_button_index() == BUTTON_LEFT):
+			and event.button_index == MOUSE_BUTTON_LEFT):
 
 		# The InputEventMouseButton doesn't have a index, so if that's the
 		# case the index will be 0
 		var i
-		if event is InputEventMouseButton and event.get_button_index() == BUTTON_LEFT:
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 			i = 0
 		else:
 			i = event.index
@@ -233,7 +234,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Otherwise it can be erased
 	if (not move_while_zooming and handle_mouse_events
 			and event is InputEventMouseButton
-			and event.get_button_index() != BUTTON_LEFT):
+			and event.button_index != MOUSE_BUTTON_LEFT):
 		# Checks if the key exists
 		if events.has(0):
 			# Erases this event from the dictionary
@@ -255,7 +256,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 		# If it's a ScreenDrag
 		if event is InputEventScreenDrag:
-			var last_pos: Vector2 = events[event.index].position
+			var last_pos: Vector2 = events.get(event.index, event).position
 
 			# If the distance between this touch index and the stored
 			# is greater than the zoom sensitivity
@@ -323,8 +324,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			var zoom_out: bool
 
 			if zoom_by_scroll:
-				zoom_in = event.get_button_index() == BUTTON_WHEEL_UP
-				zoom_out = event.get_button_index() == BUTTON_WHEEL_DOWN
+				zoom_in = event.button_index == MOUSE_BUTTON_WHEEL_UP
+				zoom_out = event.button_index == MOUSE_BUTTON_WHEEL_DOWN
 			elif zoom_by_touch_scroll:
 				zoom_in = event.delta.y > 0
 				zoom_out = event.delta.y < 0
@@ -354,12 +355,9 @@ func _on_viewport_size_changed() -> void:
 	# If the stretch mode is set to disabled or viewport, the size override will
 	# always be (0, 0). And if that's the case, the vp_size will be the
 	# viewport size
-	if get_viewport().get_size_override() == Vector2.ZERO:
-		vp_size = get_viewport().size
+	vp_size = get_viewport().get_visible_rect().size
 
-	# Otherwise, vp_size will be the size_override
-	else:
-		vp_size = get_viewport().get_size_override()
+	calculate_valid_limits()
 
 
 # Checks if the camera was flinged with a velocity greater than the minimum allowed
@@ -432,7 +430,7 @@ func finish_flying() -> void:
 
 
 # Sets the camera's zoom making sure it stays between the minimum and maximum
-func set_zoom(new_zoom: Vector2) -> void:
+func _set_zoom(new_zoom: Vector2) -> void:
 	zoomed_to_min = false
 	zoomed_to_max = false
 
@@ -467,7 +465,9 @@ func zoom_at(new_zoom: Vector2, point: Vector2) -> void:
 		# Updates the focused point value to be relative to the center
 		# of the screen
 		point -= vp_size/2
-
+	
+	new_zoom.x = max(new_zoom.x, min_zoom)
+	new_zoom.y = max(new_zoom.y, min_zoom)
 	# Sets the new zoom
 	set_zoom(new_zoom)
 
@@ -521,7 +521,7 @@ func calculate_valid_limits() -> void:
 
 
 # Sets the camera's position making sure it stays between the limits
-func set_position(new_position: Vector2) -> void:
+func _set_position(new_position: Vector2) -> void:
 	# If is to stop the camera on limit
 	if stop_on_limit:
 		# Makes sure that the camera's position stays between the limits
@@ -538,18 +538,29 @@ func set_position(new_position: Vector2) -> void:
 		limit_target.y = clamp(new_position.y, valid_limit.position.y, valid_limit.size.y)
 
 # Sets the camera's behavior relative to its limits
+# Sets the camera's behavior relative to its limits
 func set_stop_on_limit(stop: bool) -> void:
+	# Avoid infinite recursion by checking if the value is already set
+	if stop_on_limit == stop:
+		return
+
+	# Update the stop_on_limit value
 	stop_on_limit = stop
 
-	# If the stop_on_limit is true, resets the camera limits
+	# If the stop_on_limit is true, reset the camera limits
 	if stop_on_limit:
+		# Temporarily disable the setter to avoid recursion
 		limit_left = base_limits.position.x as int
 		limit_top = base_limits.position.y as int
 		limit_right = base_limits.size.x as int
 		limit_bottom = base_limits.size.y as int
 	else:
-		# Otherwise sets the limits to default values
-		limit_left = -10000000
-		limit_top = -10000000
-		limit_right = 10000000
-		limit_bottom = 10000000
+		# Otherwise, set the limits to default values
+		# Temporarily disable the setter to avoid recursion
+		limit_left = -1000000000
+		limit_top = -1000000000
+		limit_right = 1000000000
+		limit_bottom = 1000000000
+
+	# Recalculate the valid limits after updating the base limits
+	calculate_valid_limits()
