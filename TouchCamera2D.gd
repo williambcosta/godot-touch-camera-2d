@@ -17,6 +17,8 @@ enum TrackpadPanBehavior { ZOOM, PAN }
 # faster the camera will return to the limit
 @export_range(0.01, 1, 0.01) var return_speed: float = 0.15
 
+@export_range(0.1, 1.0) var pan_sensitivity: float = 0.3
+
 # If true, the camera will continue moving after a fling movement, decelerating
 # over time, until it stops completely
 @export var fling_action: bool = true
@@ -72,7 +74,7 @@ var last_pinch_distance: float = 0
 # The InputEventScreen Touch/Drag only represents the last touch, even in case
 # of multi touches. So, to hold the information off all touches you have
 # to store previous events for later use
-var events = {}
+var events := {}
 
 # Viewport size
 var vp_size := Vector2.ZERO
@@ -125,11 +127,11 @@ var dy: float = 0.0
 
 # Used to mark whether zoom has reached minimum, to prevent additional movement
 # when reached.
-var zoomed_to_min = false
+var zoomed_to_min := false
 
 # Used to mark whether zoom has reached maximum, to prevent additional movement
 # when reached.
-var zoomed_to_max = false
+var zoomed_to_max := false
 
 # Connects the viewport signal
 func _ready() -> void:
@@ -150,7 +152,7 @@ func _ready() -> void:
 
 
 # Called every frame
-func _process(_delta) -> void:
+func _process(_delta: float) -> void:
 	# If stop_on_limit is set false and there are no input events
 	if not stop_on_limit and events.size() == 0:
 		# Moves the camera towards the limit_target's position, returning it to
@@ -181,7 +183,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 		# The InputEventMouseButton doesn't have a index, so if that's the
 		# case the index will be 0
-		var i
+		var i: int
 		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 			i = 0
 		else:
@@ -267,12 +269,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		# If the dictionary have only one event stored, it means that
 		# the user is moving the camera
 		if events.size() == 1:
-			set_position(position - event.relative * zoom)
+			set_position(position - event.relative * pan_sensitivity * zoom)
 
 		# If there are more than one finger on screen
 		if events.size() > 1:
 			# Get index (this is random with window 10 touch)
-			var keys = events.keys()
+			var keys := events.keys()
 			# Stores the touches position
 			var p1: Vector2 = events[keys[0]].position
 			var p2: Vector2 = events[keys[1]].position
@@ -281,7 +283,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			if move_while_zooming:
 				# Sets the position of the camera considering the average
 				# position of the touches
-				set_position(position - event.relative / 2 * zoom)
+				set_position(position - event.relative / 2 * pan_sensitivity * zoom)
 
 			# Calculates the distance between them
 			var pinch_distance: float = p1.distance_to(p2)
@@ -295,9 +297,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				var new_zoom: Vector2
 
 				if (pinch_distance < last_pinch_distance):
-					new_zoom = zoom + zoom_increment * zoom
-				else:
 					new_zoom = zoom - zoom_increment * zoom
+				else:
+					new_zoom = zoom + zoom_increment * zoom
 
 				# If zoom at point is true
 				if zoom_at_point:
@@ -315,9 +317,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	# If the mouse events is set to be handled
 	elif handle_mouse_events:
-		var zoom_by_scroll = event is InputEventMouseButton and event.is_pressed()
-		var zoom_by_touch_scroll = event is InputEventPanGesture and trackpad_pan_behavior == TrackpadPanBehavior.ZOOM and abs(event.delta.y) > abs(event.delta.x)
-		var zoom_by_trackpad = event is InputEventMagnifyGesture
+		var zoom_by_scroll: bool = event is InputEventMouseButton and event.is_pressed()
+		var zoom_by_touch_scroll: bool = event is InputEventPanGesture and trackpad_pan_behavior == TrackpadPanBehavior.ZOOM and abs(event.delta.y) > abs(event.delta.x)
+		var zoom_by_trackpad: bool = event is InputEventMagnifyGesture
 
 		if zoom_by_scroll or zoom_by_touch_scroll or zoom_by_trackpad:
 			var zoom_in: bool
@@ -330,8 +332,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				zoom_in = event.delta.y > 0
 				zoom_out = event.delta.y < 0
 			elif zoom_by_trackpad:
-				var distance = (1 - event.factor)
-				var zoom_position = event.position if zoom_at_point else position
+				var distance: float = (1 - event.factor)
+				var zoom_position: Vector2 = event.position if zoom_at_point else position
 				zoom_at(zoom + Vector2(distance, distance), zoom_position)
 				return
 
@@ -406,8 +408,8 @@ func fling(vx: float, vy: float, dt: float) -> void:
 			dy = velocity_y / 0.2
 
 		# Calculates the next camera's position for both axis
-		var npx = position.x + vx * dt
-		var npy = position.y + vy * dt
+		var npx := position.x + vx * dt
+		var npy := position.y + vy * dt
 
 		# Moves the camera to the next position
 		set_position(Vector2(npx, npy))
@@ -469,7 +471,7 @@ func zoom_at(new_zoom: Vector2, point: Vector2) -> void:
 	new_zoom.x = max(new_zoom.x, min_zoom)
 	new_zoom.y = max(new_zoom.y, min_zoom)
 	# Sets the new zoom
-	set_zoom(new_zoom)
+	_set_zoom(new_zoom)
 
 	# If setting the zoom hasn't reached a maximum or minimum
 	if !zoomed_to_min and !zoomed_to_max:
@@ -500,24 +502,24 @@ func is_camera_out_of_limit() -> bool:
 # than the left limit, as well as the right side won't be bigger than the right
 # limit. The same with the top and bottom. Independent of the anchor mode
 func calculate_valid_limits() -> void:
-	var offset: Vector2
+	var _offset: Vector2
 	valid_limit.position = base_limits.position
 	valid_limit.size = base_limits.size
 
 	# If the camera's anchor is set to center, to make sure the camera's
 	# position stays inside the scroll limits
 	if anchor_mode == ANCHOR_MODE_DRAG_CENTER:
-		offset = vp_size / 2
-		valid_limit.position += offset * zoom
+		_offset = vp_size / 2
+		valid_limit.position += _offset * zoom
 
 	# If the anchor is set to top left, the left/top limits are not influenced
 	# by the offset. Consequently the offset for bottom/right limits are the
 	# entire viewport times the zoom
 	elif anchor_mode == ANCHOR_MODE_FIXED_TOP_LEFT:
-		offset = vp_size
+		_offset = vp_size
 
 	# Adjusts the base limit size and position relative to the offset times the zoom
-	valid_limit.size -= offset * zoom
+	valid_limit.size -= _offset * zoom
 
 
 # Sets the camera's position making sure it stays between the limits
@@ -564,3 +566,4 @@ func set_stop_on_limit(stop: bool) -> void:
 
 	# Recalculate the valid limits after updating the base limits
 	calculate_valid_limits()
+
